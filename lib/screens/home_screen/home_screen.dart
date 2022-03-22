@@ -12,9 +12,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
-  List<CardModel> cardList = [
-    // CardModel(0, 'asd', <TaskModel>[TaskModel(0, 'sdf')])
-  ];
+  List<CardModel> cardList = [];
 
   @override
   Widget build(BuildContext context) {
@@ -108,12 +106,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             ),
           ),
         ),
-        cardSettings(id,cardList),
+        cardSettings(id, cardList),
       ],
     );
   }
-  Widget taskSettings(int id, CardModel cardModel){
-    return     PopupMenuButton(
+
+  Widget taskSettings(int id, CardModel cardModel) {
+    return PopupMenuButton(
       icon: const Icon(Icons.settings),
       itemBuilder: (BuildContext context) => [
         PopupMenuItem(
@@ -149,9 +148,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             setState(() {});
             break;
           case TaskMenuItem.rename:
-                showDialog(
-                context: context,
-                builder: (buildContext) => renameTask(id, cardModel));
+            showDialog(
+              context: context,
+              builder: (buildContext) => renameTask(id, cardModel),
+            );
             break;
           default:
             break;
@@ -159,8 +159,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       },
     );
   }
-  Widget cardSettings(int id, List<CardModel> cardModel){
-    return     PopupMenuButton(
+
+  Widget cardSettings(int id, List<CardModel> cardModel) {
+    return PopupMenuButton(
       itemBuilder: (BuildContext context) => [
         PopupMenuItem(
           child: Row(
@@ -195,9 +196,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             setState(() {});
             break;
           case TaskMenuItem.rename:
-               showDialog(
-                context: context,
-                builder: (buildContext) => renameCard(id, cardModel));
+            showDialog(
+              context: context,
+              builder: (buildContext) => renameCard(id, cardModel),
+            );
             break;
           default:
             break;
@@ -205,81 +207,87 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       },
     );
   }
+
   Widget addTask(int id, CardModel cardModel) {
     TextEditingController taskNameController = TextEditingController();
     return TextButton(
-        onPressed: () => showDialog(
-            context: context,
-            builder: (buildContext) => AlertDialog(
-                  title: Container(
-                    alignment: Alignment.center,
-                    child: const Text(
-                      'Enter task name',
-                      style: TextStyle(
-                        color: blackColor,
-                        fontSize: 20,
-                      ),
-                    ),
-                  ),
-                  content: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      SizedBox(
-                        height: 50,
-                        child: TextFormField(
-                          controller: taskNameController,
-                          style: const TextStyle(
-                            color: blackColor,
-                            fontSize: 24,
-                          ),
-                          keyboardType: TextInputType.text,
-                        ),
-                      ),
-                      TextButton(
-                        onPressed: () {
-                          cardModel.tasks
-                              .add(TaskModel(id, taskNameController.text));
-                          setState(() {});
-                          Navigator.pop(context);
-                        },
-                        child: Container(
-                          alignment: Alignment.center,
-                          decoration: BoxDecoration(
-                              color: blueDarkColor,
-                              borderRadius: BorderRadius.circular(5)),
-                          height: 50,
-                          child: const Text(
-                            'Add task',
-                            style: TextStyle(color: whiteColor, fontSize: 20),
-                          ),
-                        ),
-                      )
-                    ],
-                  ),
-                ),),
-        child: Container(
-          alignment: Alignment.center,
-          height: 50,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.add,
-                color: blackColor.withOpacity(0.35),
-                size: 30,
+      onPressed: () => showDialog(
+        context: context,
+        builder: (buildContext) => AlertDialog(
+          title: Container(
+            alignment: Alignment.center,
+            child: const Text(
+              'Enter task name',
+              style: TextStyle(
+                color: blackColor,
+                fontSize: 20,
               ),
-              Text(
-                'Add task',
-                style: TextStyle(
-                  color: blackColor.withOpacity(0.35),
-                  fontSize: 20,
+            ),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SizedBox(
+                height: 50,
+                child: TextFormField(
+                  controller: taskNameController,
+                  style: const TextStyle(
+                    color: blackColor,
+                    fontSize: 24,
+                  ),
+                  keyboardType: TextInputType.text,
+                ),
+              ),
+              TextButton(
+                onPressed: () {
+                  cardModel.tasks.add(
+                    TaskModel(id, taskNameController.text),
+                  );
+                  setState(() {});
+                  Navigator.pop(context);
+                },
+                child: Container(
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: blueDarkColor,
+                    borderRadius: BorderRadius.circular(5),
+                  ),
+                  height: 50,
+                  child: const Text(
+                    'Add task',
+                    style: TextStyle(color: whiteColor, fontSize: 20),
+                  ),
                 ),
               )
             ],
           ),
-        ));
+        ),
+      ),
+      child: Container(
+        alignment: Alignment.center,
+        height: 50,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.add,
+              color: blackColor.withOpacity(0.35),
+              size: 30,
+            ),
+            Text(
+              'Add task',
+              style: TextStyle(
+                color: blackColor.withOpacity(0.35),
+                fontSize: 20,
+              ),
+            )
+          ],
+        ),
+      ),
+    );
   }
-  Widget renameTask(int id, CardModel cardModel){
+
+  Widget renameTask(int id, CardModel cardModel) {
     TextEditingController taskNameController = TextEditingController();
     return AlertDialog(
       title: Container(
@@ -315,20 +323,22 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             child: Container(
               alignment: Alignment.center,
               decoration: BoxDecoration(
-                  color: blueDarkColor,
-                  borderRadius: BorderRadius.circular(5)),
+                color: blueDarkColor,
+                borderRadius: BorderRadius.circular(5),
+              ),
               height: 50,
               child: const Text(
                 'Rename task',
                 style: TextStyle(color: whiteColor, fontSize: 20),
               ),
             ),
-          )
+          ),
         ],
       ),
     );
   }
-  Widget renameCard(int id, List<CardModel> cardModel){
+
+  Widget renameCard(int id, List<CardModel> cardModel) {
     TextEditingController taskNameController = TextEditingController();
     return AlertDialog(
       title: Container(
@@ -364,82 +374,90 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             child: Container(
               alignment: Alignment.center,
               decoration: BoxDecoration(
-                  color: blueDarkColor,
-                  borderRadius: BorderRadius.circular(5)),
+                color: blueDarkColor,
+                borderRadius: BorderRadius.circular(5),
+              ),
               height: 50,
               child: const Text(
                 'Rename card',
                 style: TextStyle(color: whiteColor, fontSize: 20),
               ),
             ),
-          )
+          ),
         ],
       ),
     );
   }
+
   Widget addCard(int id) {
     TextEditingController cardNameController = TextEditingController();
     return TextButton(
-        onPressed: () => showDialog(
-            context: context,
-            builder: (buildContext) => AlertDialog(
-                  title: Container(
-                      alignment: Alignment.center,
-                      child: const Text(
-                        'Enter column name',
-                        style: TextStyle(
-                          color: blackColor,
-                          fontSize: 20,
-                        ),
-                      )),
-                  content: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      SizedBox(
-                        height: 50,
-                        child: TextFormField(
-                          controller: cardNameController,
-                          style: const TextStyle(
-                            color: blackColor,
-                            fontSize: 24,
-                          ),
-                          keyboardType: TextInputType.text,
-                        ),
-                      ),
-                      TextButton(
-                        onPressed: () {
-                          cardList
-                              .add(CardModel(id, cardNameController.text, []));
-                          setState(() {});
-                          Navigator.pop(context);
-                        },
-                        child: Container(
-                          alignment: Alignment.center,
-                          decoration: BoxDecoration(
-                              color: blueDarkColor,
-                              borderRadius: BorderRadius.circular(5)),
-                          height: 50,
-                          child: const Text(
-                            'Add card',
-                            style: TextStyle(color: whiteColor, fontSize: 20),
-                          ),
-                        ),
-                      )
-                    ],
-                  ),
-                )),
-        child: Container(
-          alignment: Alignment.center,
-          margin: const EdgeInsets.all(5),
-          decoration: BoxDecoration(
-              color: whiteColor.withOpacity(0.55),
-              borderRadius: BorderRadius.circular(10)),
-          child: const Icon(
-            Icons.add,
-            color: whiteColor,
-            size: 50,
+      onPressed: () => showDialog(
+        context: context,
+        builder: (buildContext) => AlertDialog(
+          title: Container(
+            alignment: Alignment.center,
+            child: const Text(
+              'Enter card name',
+              style: TextStyle(
+                color: blackColor,
+                fontSize: 20,
+              ),
+            ),
           ),
-        ));
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SizedBox(
+                height: 50,
+                child: TextFormField(
+                  controller: cardNameController,
+                  style: const TextStyle(
+                    color: blackColor,
+                    fontSize: 24,
+                  ),
+                  keyboardType: TextInputType.text,
+                ),
+              ),
+              TextButton(
+                onPressed: () {
+                  cardList.add(
+                    CardModel(id, cardNameController.text, []),
+                  );
+                  setState(() {});
+                  Navigator.pop(context);
+                },
+                child: Container(
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: blueDarkColor,
+                    borderRadius: BorderRadius.circular(5),
+                  ),
+                  height: 50,
+                  child: const Text(
+                    'Add card',
+                    style: TextStyle(color: whiteColor, fontSize: 20),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+      child: Container(
+        alignment: Alignment.center,
+        margin: const EdgeInsets.all(5),
+        decoration: BoxDecoration(
+          color: whiteColor.withOpacity(0.55),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: const Icon(
+          Icons.add,
+          color: whiteColor,
+          size: 50,
+        ),
+      ),
+    );
   }
 }
 
