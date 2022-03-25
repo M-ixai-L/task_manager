@@ -1,7 +1,11 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:trello/models/card_model/card_model.dart';
 import 'package:trello/models/card_model/task_model.dart';
 import 'package:trello/models/menu_model/menu_model.dart';
+
 import 'package:trello/utils/values/colors.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -13,12 +17,52 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   List<CardModel> cardList = [];
+  final _prefs = SharedPreferences.getInstance();
+
+  saveData() async {
+    final prefs = await _prefs;
+    String json = jsonEncode(cardList);
+    prefs.setString('saveCardList', json);
+  }
+
+  loadData() async {
+    final prefs = await _prefs;
+    String json = prefs.getString('saveCardList') ?? '';
+    if (json == '') {
+      print('No saved data');
+    } else {
+      final map = jsonDecode(json) as List<dynamic>;
+      final cards = map
+          .map((e) => CardModel.fromJson(e as Map<String, dynamic>))
+          .toList();
+      setState(() {
+        cardList.clear();
+        cardList.addAll(cards);
+      });
+    }
+  }
+
+  clearData() async {
+    final prefs = await _prefs;
+    prefs.clear();
+    cardList.clear();
+  }
+
+  void showSnackBar(BuildContext context, String text) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(text)));
+  }
+
+  @override
+  void initState() {
+    loadData();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: blueColor,
-      appBar: appBar(context),
+      appBar: appBar(context, appSettings),
       body: bodyWidget,
     );
   }
@@ -97,6 +141,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         Flexible(
           child: Container(
             alignment: Alignment.center,
+            padding: const EdgeInsets.only(left: 50),
             child: Text(
               cardList[id].title,
               style: const TextStyle(
@@ -145,6 +190,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         switch (value) {
           case TaskMenuItem.delete:
             cardModel.tasks.removeAt(id);
+            saveData();
             setState(() {});
             break;
           case TaskMenuItem.rename:
@@ -193,6 +239,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         switch (value) {
           case TaskMenuItem.delete:
             cardModel.removeAt(id);
+            saveData();
             setState(() {});
             break;
           case TaskMenuItem.rename:
@@ -201,6 +248,45 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               builder: (buildContext) => renameCard(id, cardModel),
             );
             break;
+          default:
+            break;
+        }
+      },
+    );
+  }
+
+  Widget get  appSettings {
+    return PopupMenuButton(
+      icon: const Icon(
+        Icons.settings,
+        color: whiteColor,
+      ),
+      itemBuilder: (BuildContext context) => [
+        PopupMenuItem(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'Clear data',
+                style: TextStyle(
+                  color: accentRedColor,
+                ),
+              ),
+              taskMenuList[0].icon,
+            ],
+          ),
+          value: TaskMenuItem.delete,
+        ),
+      ],
+      onSelected: (value) {
+        switch (value) {
+          case TaskMenuItem.delete:
+            clearData();
+
+
+            setState(() {});
+            break;
+
           default:
             break;
         }
@@ -240,11 +326,18 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               ),
               TextButton(
                 onPressed: () {
-                  cardModel.tasks.add(
-                    TaskModel(id, taskNameController.text),
-                  );
-                  setState(() {});
-                  Navigator.pop(context);
+                  if (taskNameController.text != '') {
+                    cardModel.tasks.add(
+                      TaskModel(id: id, title: taskNameController.text),
+                    );
+                    saveData();
+                    setState(() {});
+                    Navigator.pop(context);
+                  }
+                  else{
+                  showSnackBar(context, 'Please enter name');
+                  }
+
                 },
                 child: Container(
                   alignment: Alignment.center,
@@ -316,9 +409,15 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           ),
           TextButton(
             onPressed: () {
-              cardModel.tasks[id].title = taskNameController.text;
-              setState(() {});
-              Navigator.pop(context);
+              if (taskNameController.text != '') {
+                cardModel.tasks[id].title = taskNameController.text;
+                saveData();
+                setState(() {});
+                Navigator.pop(context);
+              }
+              else{
+                showSnackBar(context, 'Please enter name');
+              }
             },
             child: Container(
               alignment: Alignment.center,
@@ -340,6 +439,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   Widget renameCard(int id, List<CardModel> cardModel) {
     TextEditingController taskNameController = TextEditingController();
+    saveData();
     return AlertDialog(
       title: Container(
         alignment: Alignment.center,
@@ -422,8 +522,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               TextButton(
                 onPressed: () {
                   cardList.add(
-                    CardModel(id, cardNameController.text, []),
+                    CardModel(
+                        id: id, title: cardNameController.text, tasks: []),
                   );
+                  saveData();
                   setState(() {});
                   Navigator.pop(context);
                 },
@@ -461,10 +563,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 }
 
-AppBar appBar(BuildContext context) {
+AppBar appBar(BuildContext context, Widget appSetings) {
   return AppBar(
     backgroundColor: purpleColor,
     title: const Text('Trello'),
     centerTitle: true,
+    actions: [
+      appSetings,
+    ],
   );
 }
